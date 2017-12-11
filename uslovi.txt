@@ -1,0 +1,5 @@
+У бази Формула 4000 налазе се:
+1. независни ентитети formula, motor, tim, vozac, menadzer, staza, prvenstvo, sponzor, vlasnik, mehanicar
+2. агрегирани ентитети trka, ucestvovanje, sponzorski_pul, vlasnistvo, odrzavanje
+3. зависни ентитет paket_guma
+4. окидача formula_before_insert, formula_before_update, vozac_before_insert, vozac_before_update, trka_before_insert, trka_after_insert, trka_before_update, ucestvovanje_before_insert, ucestvovanje_before_update који мењају стање базе и не дозвољавају уношења у базу која нису у складу с ограничењима наведеним у документацији.
