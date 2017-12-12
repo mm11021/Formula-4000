@@ -66,11 +66,11 @@ values ('Branko','Brankovic',1994,187,80,324829102,1),('Vukasin','Vukasinovic',1
 
 --update vozac
 --set tim=3
---where id_vozaca=1
+--where id_vozaca=1;
 
 --update vozac
 --set formula=324829102
---where id_vozaca=3
+--where id_vozaca=3;
 
 --motor se ne moze nalaziti u vise formula istovremeno
 --insert into formula(broj_sasije,proizvodjac,maks_brzina,tezina,duzina,motor,tim)
@@ -78,4 +78,4 @@ values ('Branko','Brankovic',1994,187,80,324829102,1),('Vukasin','Vukasinovic',1
 
 --update formula
 --set motor=829381248
---where broj_sasije=324829182;
+--where broj_sasije=324829102;
