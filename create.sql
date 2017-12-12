@@ -430,11 +430,12 @@ begin
 					where u.id_prvenstva=new.id_prvenstva) then
 		signal sqlstate '45000' set message_text='Tim ne ucesvuje na ovom prvenstvu!';
 	end if;
-	if (select count(*)
+	if (not (new.id_staze=old.id_staze and new.id_prvenstva=old.id_prvenstva)
+	   and (select count(*)
 		from trka
 		where id_prvenstva=new.id_prvenstva)=(select broj_staza
 							from prvenstvo as p
-							where p.id_prvenstva=new.id_prvenstva) then
+							where p.id_prvenstva=new.id_prvenstva)) then
 		signal sqlstate '45000' set message_text='Unet je maksimalan broj trka za ovo prvenstvo!';
 	end if;
 end$$
@@ -447,7 +448,7 @@ create trigger `formula4000`.`ucestvovanje_before_insert` before insert on `uces
 begin
 	if (select count(*)
 		from ucestvovanje
-		where id_prvenstva=new.id_prvenstva)=(select broj_staza
+		where id_prvenstva=new.id_prvenstva)=(select broj_timova
 							from prvenstvo as p
 							where p.id_prvenstva=new.id_prvenstva) then
 		signal sqlstate '45000' set message_text='Unet je maksimalan broj timova za ovo prvenstvo!';
@@ -462,7 +463,7 @@ create trigger `formula4000`.`ucestvovanje_before_update` before update on `uces
 begin
 	if (select count(*)
 		from ucestvovanje
-		where id_prvenstva=new.id_prvenstva)=(select broj_staza
+		where id_prvenstva=new.id_prvenstva)=(select broj_timova
 							from prvenstvo as p
 							where p.id_prvenstva=new.id_prvenstva) then
 		signal sqlstate '45000' set message_text='Unet je maksimalan broj timova za ovo prvenstvo!';
