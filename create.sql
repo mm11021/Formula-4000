@@ -212,7 +212,7 @@ create table if not exists `formula4000`.`vlasnik` (
   `id_vlasnika` int not null auto_increment,
   `ime` varchar(45) not null,
   `prezime` varchar(45) not null,
-  `saldo` smallint not null,
+  `saldo` int not null,
   `kriminalna_proslost` varchar(45) not null,
   `redovna_isplata` varchar(45) null,
   primary key (`id_vlasnika`))
