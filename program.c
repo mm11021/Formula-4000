@@ -18,7 +18,7 @@ void ispisi(MYSQL_RES *rezultat);
 
 int ponudi_opcije(int opcija);
 
-void formiraj_upit(int p,char *query,MYSQL *konekcija);
+int formiraj_upit(int p,char *query,MYSQL *konekcija);
 
 int main(int argc,char *argv[])
 {
@@ -55,7 +55,8 @@ int main(int argc,char *argv[])
     if(p==-1)
       continue;
 
-    formiraj_upit(p,query,konekcija);
+    if(formiraj_upit(p,query,konekcija)==-1)
+      continue;
 
     printf("%s\n",query);
 
@@ -84,7 +85,7 @@ int main(int argc,char *argv[])
   exit(EXIT_SUCCESS);
 }
 
-void formiraj_upit(int p,char *query,MYSQL *konekcija)
+int formiraj_upit(int p,char *query,MYSQL *konekcija)
 {
   char buffer1[BUFFER_SIZE],buffer2[BUFFER_SIZE],buffer3[BUFFER_SIZE],buffer4[BUFFER_SIZE];
   int a,b,c,d,e,f;
@@ -135,7 +136,7 @@ void formiraj_upit(int p,char *query,MYSQL *konekcija)
           break;
         default:
           printf("Pogresna opcija.\n");
-          return;
+          return -1;
       }
        break;
     case 1:
@@ -200,7 +201,7 @@ void formiraj_upit(int p,char *query,MYSQL *konekcija)
           printf("Unesite identifikator menadzera ili -1 ako vozac nema menadzеra: ");
           scanf("%d",&d);
 
-          if(mysql_query(konekcija, "select * from tim") != 0)
+          if(mysql_query(konekcija, "select * from tim order by id_tima") != 0)
             error_fatal("Greska u upitu %s\n", mysql_error(konekcija));
           rezultat = mysql_use_result(konekcija);
           ispisi(rezultat);
@@ -272,18 +273,76 @@ void formiraj_upit(int p,char *query,MYSQL *konekcija)
 
           sprintf(query,"insert into sponzor(ime,marketing,brend) values ('%s','%s','%s')",buffer1,buffer2,buffer3);
           break;
+
+        case 5:
+          printf("Unesite ime: ");
+          scanf("%s",buffer1);
+          printf("Unesite prezime: ");
+          scanf("%s",buffer2);
+          printf("Unesite saldo: ");
+          scanf("%d",&a);
+          printf("Da li ima kriminalnu proslost (da,ne)? ");
+          scanf("%s",buffer3);
+          printf("Da li vrsi redovnu isplatu (da,ne) (bilo sta drugo, ako nije poznato)? ");
+          scanf("%s",buffer4);
+
+          sprintf(query,"insert into vlasnik(ime,prezime,saldo,kriminalna_proslost,redovna_isplata) values ('%s','%s',%d,'%s',",buffer1,buffer2,a,buffer3);
+          if(strcasecmp(buffer4,"da")==0 || strcasecmp(buffer4,"ne")==0)
+          {
+            strcat(query,"'");
+            strcat(query,buffer4);
+            strcat(query,"')");
+          }
+          else strcat(query,"null)");
+          break;
+
+        case 6:
+          if(mysql_query(konekcija, "select broj_licence from mehanicar order by 1") != 0)
+            error_fatal("Greska u upitu %s\n", mysql_error(konekcija));
+          rezultat = mysql_use_result(konekcija);
+          ispisi(rezultat);
+          mysql_free_result(rezultat);
+
+          printf("Unesite broj licence (ne sme biti neki od gore navedenih): ");
+          scanf("%d",&a);
+          
+          printf("Unesite ime: ");
+          scanf("%s",buffer1);
+          printf("Unesite prezime: ");
+          scanf("%s",buffer2);
+          printf("Unesite struku (limar,vulkanizer,kocnice): ");
+          scanf("%s",buffer3);
+          printf("Unesite broj godina radnog staza: ");
+          scanf("%d",&b);
+          printf("Unesite broj prethodnih poslova (-1 ako nije poznato): ");
+          scanf("%d",&c);
+
+          sprintf(query,"insert into mehanicar(broj_licence,ime,prezime,struka,staz,prethodni_poslovi) values (%d,'%s','%s','%s',%d,",a,buffer1,buffer2,buffer3,b);
+          if(c==-1)
+            strcat(query,"null)");
+          else
+          {
+            sprintf(buffer4,"%d)",c);
+            strcat(query,buffer4);
+          }
+          break;
+        default:
+          printf("Pogresna opcija!\n");
+          return -1;
       }
       break;
     case 2:
       switch(p/BROJ_OPCIJA)
       {
-        case 1:
-          break;
+        default:
+          printf("Nije podrzano u ovoj verziji programa.\n");
+          return -1;
       }
     default:
-      printf("Ovo je neka magija\n");
-      return;
+      printf("Pogresna opcija!\n");
+      return -1;
   }
+  return 0;
 }
 
 int ponudi_opcije(int opcija)
@@ -320,10 +379,13 @@ int ponudi_opcije(int opcija)
       printf("%d. Unos sponzora\n",pom++);
       printf("%d. Unos vlasnika\n",pom++);
       printf("%d. Unos mehanicara\n",pom++);
-      printf("%d. Unos tima\n",pom++);
+      //printf("%d. Unos tima\n",pom++);
       scanf("%d",&pom);
       printf("\n");
       p=BROJ_OPCIJA*pom+1;
+      break;
+    case 3:
+      p=BROJ_OPCIJA*1+2;
       break;
     default:
       printf("Pogresna opcija!\n");
