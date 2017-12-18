@@ -60,9 +60,25 @@ int main(int argc,char *argv[])
 
     printf("%s\n",query);
 
-    /* Pokusava se sa izvrsavanjem upita. */
-    if(mysql_query(konekcija, query) != 0)
-      error_fatal("Greska u upitu %s\n", mysql_error(konekcija));
+    if(p==1*BROJ_OPCIJA+1) // Entitet paket_guma je zavisni entitet i pri unosu nove formule unosi se i informacija o gumama, pa se ovaj slucaj obradjuje posebno
+    {
+      char formula[QUERY_SIZE],guma[QUERY_SIZE];
+      char *kraj=strchr(query,';');
+      *kraj='\0';
+      strcpy(formula,query);
+      strcpy(guma,kraj+1);
+      if(mysql_query(konekcija, formula) != 0)
+        error_fatal("Greska u upitu %s\n", mysql_error(konekcija));
+      if(mysql_affected_rows(konekcija)==1)
+        printf("Uspesno je unet podatak u bazu.\n");
+      else printf("Podatak nije unet u bazu.\n");
+      if(mysql_query(konekcija, guma) != 0)
+        error_fatal("Greska u upitu %s\n", mysql_error(konekcija));
+    }
+    else
+      /* Pokusava se sa izvrsavanjem upita. */
+      if(mysql_query(konekcija, query) != 0)
+        error_fatal("Greska u upitu %s\n", mysql_error(konekcija));
 
     switch(opcija)
     {
@@ -74,6 +90,7 @@ int main(int argc,char *argv[])
       case 2:
         if(mysql_affected_rows(konekcija)==1)
           printf("Uspesno je unet podatak u bazu.\n");
+        else printf("Podatak nije unet u bazu.\n");
         break;
     }
   }
@@ -88,6 +105,7 @@ int main(int argc,char *argv[])
 int formiraj_upit(int p,char *query,MYSQL *konekcija)
 {
   char buffer1[BUFFER_SIZE],buffer2[BUFFER_SIZE],buffer3[BUFFER_SIZE],buffer4[BUFFER_SIZE];
+  char upit[QUERY_SIZE];
   int a,b,c,d,e,f;
   MYSQL_RES *rezultat;
   switch(p%BROJ_OPCIJA)
@@ -178,7 +196,29 @@ int formiraj_upit(int p,char *query,MYSQL *konekcija)
           printf("Unesite identifikator tima: ");
           scanf("%d",&f);
 
-          sprintf(query,"insert into formula values (%d,'%s',%d,%d,%d,%d,%d)",a,buffer1,b,c,d,e,f);
+          sprintf(query,"insert into formula values (%d,'%s',%d,%d,%d,%d,%d);",a,buffer1,b,c,d,e,f);
+
+          printf("Unesite proizvodjaca guma: ");
+          scanf("%s",buffer1);
+          printf("Unesite tip guma (suvo,mokro): ");
+          scanf("%s",buffer2);
+          printf("Unesite velicinu guma: ");
+          scanf("%d",&b);
+          printf("Unesite radnu temperaturu guma: ");
+          scanf("%d",&c);
+          printf("Unesite trajanje guma (-1 ukoliko nije poznato): ");
+          scanf("%d",&d);
+
+          sprintf(upit,"insert into paket_guma values (%d,'%s','%s',%d,%d,",a,buffer1,buffer2,b,c);
+
+          if(d==-1)
+            strcat(upit,"null)");
+          else
+          {
+            sprintf(buffer3,"%d)",d);
+            strcat(upit,buffer3);
+          }
+          strcat(query,upit);
           break;
 
         case 2:
@@ -250,7 +290,7 @@ int formiraj_upit(int p,char *query,MYSQL *konekcija)
         case 3:
           printf("Unesite ime: ");
           scanf("%s",buffer1);
-          printf("Unesite broj \"vezа\" (-1 ukoliko nije poznat): ");
+          printf("Unesite broj \"veza\" (-1 ukoliko nije poznat): ");
           scanf("%d",&a);
 
           sprintf(query,"insert into menadzer(ime,veze) values ('%s',",buffer1);
