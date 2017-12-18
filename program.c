@@ -57,6 +57,8 @@ int main(int argc,char *argv[])
 
     formiraj_upit(p,query,konekcija);
 
+    printf("%s\n",query);
+
     /* Pokusava se sa izvrsavanjem upita. */
     if(mysql_query(konekcija, query) != 0)
       error_fatal("Greska u upitu %s\n", mysql_error(konekcija));
@@ -74,9 +76,6 @@ int main(int argc,char *argv[])
         break;
     }
   }
-  
-  /* Oslobadja se trenutni rezultat, posto nam vise ne treba. */
-  mysql_free_result(rezultat);
 
   /* Zatvara se konekcija. */
   mysql_close(konekcija);
@@ -180,7 +179,98 @@ void formiraj_upit(int p,char *query,MYSQL *konekcija)
 
           sprintf(query,"insert into formula values (%d,'%s',%d,%d,%d,%d,%d)",a,buffer1,b,c,d,e,f);
           break;
+
         case 2:
+          printf("Unesite ime: ");
+          scanf("%s",buffer1);
+          printf("Unesite prezime: ");
+          scanf("%s",buffer2);
+          printf("Unesite godinu rodjenja: ");
+          scanf("%d",&a);
+          printf("Unesite visinu: ");
+          scanf("%d",&b);
+          printf("Unesite tezinu: ");
+          scanf("%d",&c);
+
+          if(mysql_query(konekcija, "select * from menadzer") != 0)
+            error_fatal("Greska u upitu %s\n", mysql_error(konekcija));
+          rezultat = mysql_use_result(konekcija);
+          ispisi(rezultat);
+          mysql_free_result(rezultat);
+          printf("Unesite identifikator menadzera ili -1 ako vozac nema menadzеra: ");
+          scanf("%d",&d);
+
+          if(mysql_query(konekcija, "select * from tim") != 0)
+            error_fatal("Greska u upitu %s\n", mysql_error(konekcija));
+          rezultat = mysql_use_result(konekcija);
+          ispisi(rezultat);
+          mysql_free_result(rezultat);
+          printf("Unesite identifikator tima ili -1 ako vozac trenutno ne vozi ni u jednom timu: ");
+          scanf("%d",&e);
+
+          if(e!=-1)
+          {
+            char upit[QUERY_SIZE];
+            sprintf(upit,"select * from formula where tim=%d",e);
+            if(mysql_query(konekcija,upit) != 0)
+              error_fatal("Greska u upitu %s\n", mysql_error(konekcija));
+            rezultat = mysql_use_result(konekcija);
+            ispisi(rezultat);
+            mysql_free_result(rezultat);
+            printf("Unesite broj sasije formule koju vozac vozi ili -1 ako trenutno ne vozi nijednu formulu: ");
+            scanf("%d",&f);
+          }
+          else f=-1;
+
+          sprintf(query,"insert into vozac(ime,prezime,godina_rodjenja,visina,tezina,menadzer,tim,formula) values ('%s','%s',%d,%d,%d,",buffer1,buffer2,a,b,c);
+          if(d==-1)
+            strcat(query,"null,");
+          else
+          {
+            sprintf(buffer3,"%d,",d);
+            strcat(query,buffer3);
+          }
+          if(e==-1)
+            strcat(query,"null,");
+          else
+          {
+            sprintf(buffer3,"%d,",e);
+            strcat(query,buffer3);
+          }
+          if(f==-1)
+            strcat(query,"null)");
+          else
+          {
+            sprintf(buffer3,"%d)",f);
+            strcat(query,buffer3);
+          }
+          break;
+
+        case 3:
+          printf("Unesite ime: ");
+          scanf("%s",buffer1);
+          printf("Unesite broj \"vezа\" (-1 ukoliko nije poznat): ");
+          scanf("%d",&a);
+
+          sprintf(query,"insert into menadzer(ime,veze) values ('%s',",buffer1);
+          if(a==-1)
+            strcat(query,"null)");
+          else
+          {
+            sprintf(buffer2,"%d)",a);
+            strcat(query,buffer2);
+          }
+          break;
+
+        case 4:
+          printf("Unesite ime: ");
+          scanf("%s",buffer1);
+          printf("Unesite marketinsku sposobnost (odlican,srednji,los): ");
+          scanf("%s",buffer2);
+          printf("Unesite prepoznatljivost (brend) (visok,srednji,nizak): ");
+          scanf("%s",buffer3);
+
+          sprintf(query,"insert into sponzor(ime,marketing,brend) values ('%s','%s','%s')",buffer1,buffer2,buffer3);
           break;
       }
       break;
