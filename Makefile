@@ -1,8 +1,8 @@
 CC	= gcc
 CFLAGS	= -g -Wall `mysql_config --cflags --libs`
 
-program: 1.c
-	$(CC) $(CFLAGS) 1.c -o $@
+program: program.c
+	$(CC) $(CFLAGS) $< -o $@
 
 create: create.sql
 	mysql -u root <$<
